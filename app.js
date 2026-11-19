@@ -1481,8 +1481,7 @@ const PFOS = (() => {
   async function downloadFlutterApkKit() {
     if (typeof JSZip === 'undefined') return showToast('JSZip not loaded yet.', 'error');
     const zip = new JSZip();
-    zip.file('README.md', '# PFOS Native Android APK Builder (SQLite)
-Upload to GitHub -> Actions -> Build PFOS Android APK -> Download app-release.apk.');
+    zip.file('README.md', '# PFOS Native Android APK Builder (SQLite)\nUpload to GitHub -> Actions -> Build PFOS Android APK -> Download app-release.apk.');
     zip.file('.github/workflows/build_apk.yml', `name: Build PFOS Android APK
 on: [push, workflow_dispatch]
 jobs:
@@ -1628,6 +1627,7 @@ class _PfosSqliteAppState extends State<PfosSqliteApp> {
 
   // ==================== BOOTSTRAP ====================
   async function boot() {
+    refreshIcons();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
