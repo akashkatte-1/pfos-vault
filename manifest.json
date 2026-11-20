@@ -1,7 +1,7 @@
 {
   "name": "PFOS \u2014 Personal Financial Operating System",
   "short_name": "PFOS",
-  "description": "100% Offline-First Encrypted SQLite Personal Financial Operating System",
+  "description": "100% Offline-First Encrypted SQLite Personal Financial Operating System & Smart Assistant",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -20,6 +20,60 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Expense (3s)",
+      "short_name": "+ Expense",
+      "description": "Log an expense in 3 seconds",
+      "url": "./index.html?action=quick-expense",
+      "icons": [
+        {
+          "src": "https://placehold.co/192x192/f43f5e/ffffff.png?text=-%E2%82%B9",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Quick Income",
+      "short_name": "+ Income",
+      "description": "Log incoming cash, salary, or UPI",
+      "url": "./index.html?action=quick-income",
+      "icons": [
+        {
+          "src": "https://placehold.co/192x192/10b981/090d16.png?text=+%E2%82%B9",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Voice Transaction Entry",
+      "short_name": "Voice",
+      "description": "Speak an expense or income offline",
+      "url": "./index.html?action=voice",
+      "icons": [
+        {
+          "src": "https://placehold.co/192x192/8b5cf6/ffffff.png?text=MIC",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Quick ATM / UPI Transfer",
+      "short_name": "ATM / UPI",
+      "description": "Log ATM withdrawal or UPI transfer",
+      "url": "./index.html?action=quick-atm",
+      "icons": [
+        {
+          "src": "https://placehold.co/192x192/0ea5e9/ffffff.png?text=ATM",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

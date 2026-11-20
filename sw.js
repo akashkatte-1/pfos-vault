@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pfos-sqlite-pwa-v3';
+const CACHE_NAME = 'pfos-sqlite-pwa-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -36,7 +36,6 @@ self.addEventListener('fetch', (event) => {
   const isLocalAppFile = url.origin === self.location.origin;
 
   if (isLocalAppFile) {
-    // Network-first for app updates; offline falls back to cache
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -51,7 +50,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for external CDN assets (sql-wasm.wasm, charts, icons)
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -62,6 +60,28 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       });
+    })
+  );
+});
+
+// Handle Offline Local Notification Clicks & Quick Actions (Lock Screen / Notification Shade)
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const action = event.action || (event.notification.data && event.notification.data.action) || 'home';
+  const targetUrl = './index.html?action=' + encodeURIComponent(action);
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
+      for (const client of clientsList) {
+        if ('focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'PFOS_QUICK_ACTION', action });
+          return;
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
     })
   );
 });

@@ -1,7 +1,7 @@
 /**
- * PFOS SQLite Storage & AES-256-GCM Encryption Engine
- * Stores all financial data strictly in binary SQLite (OPFS + IndexedDB + optional local disk sync).
- * Zero financial data is stored in index.html or localStorage.
+ * PFOS v3.0 SQLite Storage & AES-256-GCM Encryption Engine
+ * Persists all financial records, recurring rules, audits, and notification settings
+ * in binary SQLite (OPFS + IndexedDB + optional Desktop disk sync).
  */
 const PFOS_DB = (() => {
   const OPFS_FILENAME = 'pfos_vault.sqlite';
@@ -18,7 +18,6 @@ const PFOS_DB = (() => {
   let dbSizeKB = 0;
   let backendLabel = 'OPFS Binary SQLite';
 
-  // ==================== WEB CRYPTO (PBKDF2 + AES-256-GCM) ====================
   async function deriveKey(pin, salt) {
     const enc = new TextEncoder();
     const baseKey = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
@@ -60,7 +59,6 @@ const PFOS_DB = (() => {
     return new Uint8Array(plainBuf);
   }
 
-  // ==================== OPFS & INDEXEDDB PERSISTENCE ====================
   function openIdb() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(IDB_NAME, 1);
@@ -75,7 +73,6 @@ const PFOS_DB = (() => {
   }
 
   async function readStoredBlob() {
-    // 1. Origin Private File System (OPFS)
     try {
       if (navigator.storage && navigator.storage.getDirectory) {
         const root = await navigator.storage.getDirectory();
@@ -89,7 +86,6 @@ const PFOS_DB = (() => {
       }
     } catch (_) {}
 
-    // 2. IndexedDB binary store fallback
     try {
       const idb = await openIdb();
       return await new Promise((resolve) => {
@@ -141,7 +137,6 @@ const PFOS_DB = (() => {
     }
   }
 
-  // ==================== RELATIONAL SQLITE SCHEMA ====================
   function createTables(database) {
     database.run(`
       CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
@@ -155,6 +150,11 @@ const PFOS_DB = (() => {
         toAccountId TEXT, category TEXT, method TEXT, upiApp TEXT, upiId TEXT,
         refNumber TEXT, merchant TEXT, date TEXT, time TEXT, source TEXT,
         isAtm INTEGER, notes TEXT
+      );
+      CREATE TABLE IF NOT EXISTS recurring_rules (
+        id TEXT PRIMARY KEY, profile TEXT, type TEXT, title TEXT, amount REAL,
+        accountId TEXT, category TEXT, method TEXT, frequency TEXT,
+        nextRunDate TEXT, lastRunDate TEXT, active INTEGER
       );
       CREATE TABLE IF NOT EXISTS loans (
         id TEXT PRIMARY KEY, profile TEXT, direction TEXT, person TEXT,
@@ -191,7 +191,7 @@ const PFOS_DB = (() => {
     });
   }
 
-  function waitForSqlJs(timeoutMs = 12000) {
+  function waitForSqlJs(timeoutMs = 15000) {
     return new Promise((resolve, reject) => {
       const start = Date.now();
       const check = () => {
@@ -200,7 +200,7 @@ const PFOS_DB = (() => {
             locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
           }).then(resolve).catch(reject);
         } else if (Date.now() - start > timeoutMs) {
-          reject(new Error('Timed out loading sql-wasm.js. Check network connection on first launch.'));
+          reject(new Error('Timed out loading sql-wasm.js. Check internet connection on first launch.'));
         } else {
           setTimeout(check, 80);
         }
@@ -261,12 +261,18 @@ const PFOS_DB = (() => {
     if (!db) return;
     db.run('BEGIN TRANSACTION;');
     try {
-      ['meta', 'accounts', 'transactions', 'loans', 'obligations', 'budgets', 'goals', 'investments', 'networth_history']
-        .forEach((t) => db.run(`DELETE FROM ${t};`));
+      [
+        'meta', 'accounts', 'transactions', 'recurring_rules', 'loans',
+        'obligations', 'budgets', 'goals', 'investments', 'networth_history'
+      ].forEach((t) => db.run(`DELETE FROM ${t};`));
 
       const m = db.prepare('INSERT INTO meta VALUES (?, ?)');
       m.run(['activeProfile', st.activeProfile || 'ALL']);
       m.run(['reconciliation', JSON.stringify(st.reconciliation || { dailyReviewDates: [], missedPayments90d: 0 })]);
+      m.run(['notificationSettings', JSON.stringify(st.notificationSettings || {})]);
+      m.run(['weeklyAudit', JSON.stringify(st.weeklyAudit || {})]);
+      m.run(['monthlyClosing', JSON.stringify(st.monthlyClosing || {})]);
+      m.run(['assistantMeta', JSON.stringify(st.assistantMeta || {})]);
       m.free();
 
       const aStmt = db.prepare('INSERT INTO accounts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
@@ -284,6 +290,14 @@ const PFOS_DB = (() => {
         t.merchant || '', t.date || '', t.time || '12:00', t.source || 'MANUAL', t.isAtm ? 1 : 0, t.notes || ''
       ]));
       tStmt.free();
+
+      const rStmt = db.prepare('INSERT INTO recurring_rules VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
+      (st.recurringRules || []).forEach((r) => rStmt.run([
+        r.id, r.profile || 'PERSONAL', r.type || 'EXPENSE', r.title || '', Number(r.amount || 0),
+        r.accountId || '', r.category || 'Other', r.method || 'AUTO', r.frequency || 'MONTHLY',
+        r.nextRunDate || '', r.lastRunDate || '', r.active ? 1 : 0
+      ]));
+      rStmt.free();
 
       const lStmt = db.prepare('INSERT INTO loans VALUES (?,?,?,?,?,?,?,?,?)');
       (st.loans || []).forEach((l) => lStmt.run([
@@ -329,14 +343,23 @@ const PFOS_DB = (() => {
     }
   }
 
+  function safeParse(str, fallback) {
+    try { return str ? JSON.parse(str) : fallback; } catch (_) { return fallback; }
+  }
+
   function loadState() {
     const meta = {};
     queryAll('SELECT key, value FROM meta').forEach((r) => (meta[r.key] = r.value));
     return {
       activeProfile: meta.activeProfile || 'ALL',
-      reconciliation: meta.reconciliation ? JSON.parse(meta.reconciliation) : { dailyReviewDates: [], missedPayments90d: 0 },
+      reconciliation: safeParse(meta.reconciliation, { dailyReviewDates: [], missedPayments90d: 0 }),
+      notificationSettings: safeParse(meta.notificationSettings, null),
+      weeklyAudit: safeParse(meta.weeklyAudit, null),
+      monthlyClosing: safeParse(meta.monthlyClosing, null),
+      assistantMeta: safeParse(meta.assistantMeta, null),
       accounts: queryAll('SELECT * FROM accounts'),
       transactions: queryAll('SELECT * FROM transactions').map((t) => ({ ...t, isAtm: !!t.isAtm })),
+      recurringRules: queryAll('SELECT * FROM recurring_rules').map((r) => ({ ...r, active: !!r.active })),
       loans: queryAll('SELECT * FROM loans'),
       obligations: queryAll('SELECT * FROM obligations').map((o) => ({ ...o, paidThisMonth: !!o.paidThisMonth })),
       budgets: queryAll('SELECT id, profile, category, budgetLimit AS "limit" FROM budgets'),
