@@ -24,9 +24,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Quick Expense (3s)",
+      "name": "Add Expense",
       "short_name": "+ Expense",
-      "description": "Log an expense in 3 seconds",
+      "description": "Log a detailed expense",
       "url": "./index.html?action=quick-expense",
       "icons": [
         {
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "name": "Quick Income",
+      "name": "Add Income",
       "short_name": "+ Income",
       "description": "Log incoming cash, salary, or UPI",
       "url": "./index.html?action=quick-income",
@@ -63,9 +63,9 @@
       ]
     },
     {
-      "name": "Quick ATM / UPI Transfer",
-      "short_name": "ATM / UPI",
-      "description": "Log ATM withdrawal or UPI transfer",
+      "name": "ATM / Transfer",
+      "short_name": "Transfer",
+      "description": "Log ATM withdrawal or account transfer",
       "url": "./index.html?action=quick-atm",
       "icons": [
         {

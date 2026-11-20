@@ -108,8 +108,8 @@
     </div>
 
     <div class="space-y-2.5 pt-4 border-t border-slate-800/80">
-      <button onclick="PFOS.openQuickEntryPad('EXPENSE')" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]">
-        <i data-lucide="zap" class="w-4 h-4"></i> 3-Sec Quick Entry (+₹)
+      <button onclick="PFOS.openTransactionModal('EXPENSE')" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> + Add Transaction
       </button>
       <div class="flex items-center justify-between px-2 text-[11px] text-slate-400">
         <span id="sidebar-sqlite-status" class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Booting SQLite...</span>
@@ -148,7 +148,13 @@
           <span id="header-alert-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center">0</span>
         </button>
 
-      
+        <button onclick="PFOS.openApkModal()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">APK</span>
+        </button>
+
+        <button id="header-lock-btn" onclick="PFOS.lockVaultNow()" class="hidden p-2 rounded-xl bg-card hover:bg-slate-800 border border-slate-700/80 text-emerald-400 transition" title="Lock Encrypted Vault">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </button>
       </div>
     </header>
 
@@ -163,9 +169,9 @@
     </main>
   </div>
 
-  <!-- ==================== FLOATING 3-SECOND QUICK ENTRY BUTTON (+₹) ==================== -->
-  <button onclick="PFOS.openQuickEntryPad('EXPENSE')" class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 h-12 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-2xl shadow-emerald-500/30 flex items-center gap-1.5 active:scale-95 transition" title="3-Second Quick Entry">
-    <i data-lucide="zap" class="w-4 h-4"></i><span>+₹</span>
+  <!-- ==================== FLOATING ADD TRANSACTION BUTTON ==================== -->
+  <button onclick="PFOS.openTransactionModal('EXPENSE')" class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 h-12 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-2xl shadow-emerald-500/30 flex items-center gap-1.5 active:scale-95 transition" title="Add Expense / Income / Transfer">
+    <i data-lucide="plus" class="w-4 h-4"></i><span>+ Add</span>
   </button>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->

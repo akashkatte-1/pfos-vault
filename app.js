@@ -472,7 +472,7 @@ const PFOS = (() => {
         body: `You have recorded ${formatINR(m.todaySpending)} today. Have you logged all expenses?`,
         actions: [
           { label: 'Review Expenses', onclick: "PFOS.setTab('timeline')" },
-          { label: '+ Add Expense', onclick: "PFOS.openQuickEntryPad('EXPENSE')" },
+          { label: '+ Add Expense', onclick: "PFOS.openTransactionModal('EXPENSE')" },
           { label: 'Mark Done', onclick: "PFOS.completeDailyReview()" }
         ]
       });
@@ -503,7 +503,7 @@ const PFOS = (() => {
           title: 'Possible Missing Habit Expense',
           body: 'You usually record daily commute / tea / lunch expenses. Did you forget to log one today?',
           actions: [
-            { label: '+ Log Quick Expense', onclick: "PFOS.openQuickEntryPad('EXPENSE')" },
+            { label: '+ Add Expense', onclick: "PFOS.openTransactionModal('EXPENSE')" },
             { label: 'Dismiss', onclick: "PFOS.dismissAlert('cat2_habit')" }
           ]
         });
@@ -646,7 +646,7 @@ const PFOS = (() => {
           title: 'Salary Not Recorded Yet',
           body: 'Salary normally arrives early in the month. No salary transaction found this month yet.',
           actions: [
-            { label: '+ Add Income', onclick: "PFOS.openQuickEntryPad('INCOME')" },
+            { label: '+ Add Income', onclick: "PFOS.openTransactionModal('INCOME')" },
             { label: 'Dismiss', onclick: "PFOS.dismissAlert('cat8_salary')" }
           ]
         });
@@ -956,11 +956,11 @@ const PFOS = (() => {
         </div>
       </section>
 
-      <!-- LOCK SCREEN / 3-SECOND QUICK ACTIONS BAR -->
+      <!-- QUICK ACTIONS BAR (DETAILED V2 MODALS) -->
       <section class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <button onclick="PFOS.openQuickEntryPad('EXPENSE')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold transition active:scale-95"><i data-lucide="zap" class="w-4 h-4"></i> + Expense (3s)</button>
-        <button onclick="PFOS.openQuickEntryPad('INCOME')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition active:scale-95"><i data-lucide="plus-circle" class="w-4 h-4"></i> + Income</button>
-        <button onclick="PFOS.openQuickEntryPad('ATM')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold transition active:scale-95"><i data-lucide="banknote" class="w-4 h-4"></i> + ATM / UPI</button>
+        <button onclick="PFOS.openTransactionModal('EXPENSE')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold transition active:scale-95"><i data-lucide="minus-circle" class="w-4 h-4"></i> + Expense</button>
+        <button onclick="PFOS.openTransactionModal('INCOME')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition active:scale-95"><i data-lucide="plus-circle" class="w-4 h-4"></i> + Income</button>
+        <button onclick="PFOS.openTransactionModal('TRANSFER')" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold transition active:scale-95"><i data-lucide="arrow-left-right" class="w-4 h-4"></i> ATM / Transfer</button>
         <button onclick="PFOS.openVoiceModal()" class="flex items-center justify-center gap-2 p-3 rounded-2xl bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/30 text-violet-300 text-xs font-bold transition active:scale-95"><i data-lucide="mic" class="w-4 h-4"></i> Voice Entry</button>
         <button onclick="PFOS.openSmsModal()" class="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition active:scale-95"><i data-lucide="message-square-code" class="w-4 h-4"></i> SMS Parser</button>
       </section>
@@ -1807,7 +1807,7 @@ const PFOS = (() => {
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div class="rounded-2xl bg-obsidian/80 border border-slate-800 p-4 flex flex-col justify-between gap-3">
-            <div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">INSTANT PWA</span><h4 class="text-sm font-bold mt-2">1. Install via Chrome</h4><p class="text-[11px] text-slate-400 mt-1">Long-press app icon for 3-second +Expense, +Income, +ATM &amp; Voice shortcuts.</p></div>
+            <div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">INSTANT PWA</span><h4 class="text-sm font-bold mt-2">1. Install via Chrome</h4><p class="text-[11px] text-slate-400 mt-1">Long-press app icon for +Expense, +Income, +ATM &amp; Voice shortcuts.</p></div>
             <button onclick="PFOS.triggerPwaInstall()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">Install App</button>
           </div>
           <div class="rounded-2xl bg-obsidian/80 border border-slate-800 p-4 flex flex-col justify-between gap-3">
@@ -1829,94 +1829,6 @@ const PFOS = (() => {
         </div>
       </div>
     `;
-  }
-
-  // ==================== 3-SECOND QUICK ENTRY PAD (LOCK SCREEN / SHORTCUT MODE) ====================
-  function openQuickEntryPad(mode = 'EXPENSE') {
-    const quickCats = mode === 'INCOME'
-      ? ['Cash Received', 'Salary', 'Freelance', 'Refund', 'Gift']
-      : ['Tea', 'Lunch', 'Travel', 'Grocery', 'Snacks', 'Fuel', 'Other'];
-    const bankAcc = state.accounts.find(a => a.type === 'BANK') || state.accounts[0];
-    const cashAcc = state.accounts.find(a => a.type === 'CASH') || state.accounts[0];
-
-    openModal(`
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-base font-extrabold flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-emerald-400"></i> 3-Second Quick Entry</h3>
-        <button onclick="PFOS.closeModal()" class="p-1.5 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="grid grid-cols-5 gap-1.5 mb-4">
-        ${[
-          ['EXPENSE', '+ Expense'],
-          ['INCOME', '+ Income'],
-          ['ATM', '+ ATM'],
-          ['UPI', '+ UPI'],
-          ['VOICE', 'Voice']
-        ].map(([k, lbl]) => `
-          <button type="button" onclick="${k === 'VOICE' ? 'PFOS.openVoiceModal()' : `PFOS.openQuickEntryPad('${k}')`}"
-            class="py-2 rounded-xl text-[11px] font-bold border transition ${mode === k ? 'bg-emerald-500 text-slate-950 border-emerald-500' : 'bg-obsidian border-slate-800 text-slate-300'}">
-            ${lbl}
-          </button>
-        `).join('')}
-      </div>
-
-      <form onsubmit="PFOS.submitQuickEntry(event, '${mode}')" class="space-y-3.5">
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Amount (₹)</label>
-          <input id="quick-amt-input" type="number" name="amount" required min="1" step="any" autofocus placeholder="₹120"
-            class="w-full bg-obsidian border border-emerald-500/40 rounded-2xl px-4 py-3 text-2xl font-extrabold text-emerald-400 text-center focus:outline-none focus:border-emerald-400" />
-        </div>
-
-        ${mode === 'ATM' ? `
-          <p class="text-xs text-sky-300 bg-sky-500/10 border border-sky-500/20 rounded-xl p-2.5 text-center">
-            Transfers from <strong>${escapeHtml(bankAcc.name)}</strong> → <strong>${escapeHtml(cashAcc.name)}</strong>
-          </p>
-        ` : `
-          <div>
-            <label class="text-[11px] text-slate-400 block mb-1.5">${mode === 'UPI' ? 'UPI Recipient / Note' : 'Tap Category'}</label>
-            ${mode === 'UPI' ? `
-              <input type="text" name="label" required placeholder="e.g. Swiggy, Rahul, Shop UPI" class="w-full bg-obsidian border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100" />
-            ` : `
-              <input type="text" id="quick-cat-input" name="label" value="${quickCats[0]}" required class="w-full bg-obsidian border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 mb-2" />
-              <div class="flex flex-wrap gap-1.5">
-                ${quickCats.map(c => `<button type="button" onclick="document.getElementById('quick-cat-input').value='${c}'" class="px-3 py-1.5 rounded-xl bg-obsidian hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200">${c}</button>`).join('')}
-              </div>
-            `}
-          </div>
-        `}
-
-        <button type="submit" class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
-          Save in SQLite ✓
-        </button>
-      </form>
-    `);
-    setTimeout(() => document.getElementById('quick-amt-input')?.focus(), 50);
-  }
-
-  async function submitQuickEntry(e, mode) {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const amount = Number(fd.get('amount'));
-    const label = (fd.get('label') || '').trim();
-    const bankAcc = state.accounts.find(a => a.type === 'BANK') || state.accounts[0];
-    const cashAcc = state.accounts.find(a => a.type === 'CASH') || state.accounts[0];
-    const walletAcc = state.accounts.find(a => a.type === 'WALLET') || bankAcc;
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    let tx;
-    if (mode === 'ATM') {
-      tx = { id: uid('tx'), profile: 'PERSONAL', type: 'TRANSFER', amount, accountId: bankAcc.id, toAccountId: cashAcc.id, category: 'ATM Withdrawal', merchant: 'ATM Withdraw', method: 'CARD', date: todayISO(), time: timeStr, source: 'LOCKSCREEN', isAtm: true };
-    } else if (mode === 'INCOME') {
-      tx = { id: uid('tx'), profile: 'PERSONAL', type: 'INCOME', amount, accountId: label.toLowerCase().includes('cash') ? cashAcc.id : bankAcc.id, toAccountId: null, category: label || 'Income', merchant: label || 'Quick Income', method: label.toLowerCase().includes('cash') ? 'CASH' : 'UPI', date: todayISO(), time: timeStr, source: 'LOCKSCREEN', isAtm: false };
-    } else if (mode === 'UPI') {
-      tx = { id: uid('tx'), profile: 'PERSONAL', type: 'EXPENSE', amount, accountId: walletAcc.id, toAccountId: null, category: 'UPI Transfer', merchant: label || 'UPI Payment', method: 'UPI', upiApp: 'UPI', date: todayISO(), time: timeStr, source: 'LOCKSCREEN', isAtm: false };
-    } else {
-      tx = { id: uid('tx'), profile: 'PERSONAL', type: 'EXPENSE', amount, accountId: cashAcc.id, toAccountId: null, category: label || 'Other', merchant: label || 'Quick Expense', method: 'CASH', date: todayISO(), time: timeStr, source: 'LOCKSCREEN', isAtm: false };
-    }
-    await addTransactionRecord(tx);
-    closeModal();
-    showToast(`Logged ${tx.merchant} (${formatINR(amount)}) in SQLite!`);
   }
 
   // ==================== GLOBAL SEARCH ENGINE ====================
@@ -2275,7 +2187,14 @@ const PFOS = (() => {
       ? ['ATM Withdrawal', 'Bank to Wallet', 'Wallet to Bank', 'Credit Card Bill', 'Self Transfer']
       : ['Food', 'Tea', 'Fuel', 'Shopping', 'Transport', 'Rent', 'EMI', 'Bills', 'Health', 'Entertainment', 'Other'];
     openModal(`
-      <div class="flex items-center justify-between mb-4"><h3 class="text-base font-bold">${editTx ? 'Edit' : 'Add'} ${type === 'TRANSFER' ? 'Transfer / ATM Cash' : type.charAt(0) + type.slice(1).toLowerCase()}</h3><button onclick="PFOS.closeModal()" class="p-1.5 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="flex items-center justify-between mb-3"><h3 class="text-base font-bold">${editTx ? 'Edit' : 'Add'} ${type === 'TRANSFER' ? 'Transfer / ATM Cash' : type.charAt(0) + type.slice(1).toLowerCase()}</h3><button onclick="PFOS.closeModal()" class="p-1.5 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      ${!editTx ? `
+        <div class="grid grid-cols-3 gap-1.5 mb-4">
+          <button type="button" onclick="PFOS.openTransactionModal('EXPENSE', '${preselectAccId}')" class="py-2 rounded-xl text-xs font-bold border transition ${type === 'EXPENSE' ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-obsidian border-slate-800 text-slate-400'}">Expense</button>
+          <button type="button" onclick="PFOS.openTransactionModal('INCOME', '${preselectAccId}')" class="py-2 rounded-xl text-xs font-bold border transition ${type === 'INCOME' ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-obsidian border-slate-800 text-slate-400'}">Income</button>
+          <button type="button" onclick="PFOS.openTransactionModal('TRANSFER', '${preselectAccId}')" class="py-2 rounded-xl text-xs font-bold border transition ${type === 'TRANSFER' ? 'bg-sky-500/20 border-sky-500/40 text-sky-300' : 'bg-obsidian border-slate-800 text-slate-400'}">ATM / Transfer</button>
+        </div>
+      ` : ''}
       <form onsubmit="PFOS.submitTransaction(event, '${editTx ? editTx.id : ''}')" class="space-y-3.5">
         <input type="hidden" name="type" value="${type}" />
         <div class="grid grid-cols-2 gap-3">
@@ -2303,6 +2222,10 @@ const PFOS = (() => {
           <div><label class="text-[11px] text-slate-400 block mb-1">UPI ID / Ref</label><input type="text" name="upiId" value="${editTx ? escapeHtml(editTx.upiId) : ''}" placeholder="merchant@okhdfc" class="w-full bg-obsidian border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100" /></div>
           <div><label class="text-[11px] text-slate-400 block mb-1">Profile</label><select name="profile" class="w-full bg-obsidian border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">${['PERSONAL','FAMILY','BUSINESS'].map(p => `<option value="${p}" ${editTx && editTx.profile === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
         </div>
+        <div>
+          <label class="text-[11px] text-slate-400 block mb-1">Notes (Optional)</label>
+          <input type="text" name="notes" value="${editTx ? escapeHtml(editTx.notes) : ''}" placeholder="Add any extra details..." class="w-full bg-obsidian border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100" />
+        </div>
         <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition">${editTx ? 'Update Transaction' : 'Save to SQLite'}</button>
       </form>
     `);
@@ -2327,13 +2250,13 @@ const PFOS = (() => {
       const oldTx = state.transactions[idx];
       applyBalanceImpact(oldTx, -1);
       const toAcc = toAccountId ? state.accounts.find(a => a.id === toAccountId) : null;
-      const updatedTx = { ...oldTx, profile: fd.get('profile') || 'PERSONAL', amount, accountId, toAccountId, category: fd.get('category') || oldTx.category, merchant: fd.get('merchant') || fd.get('category') || type, method: fd.get('method') || 'UPI', upiId: fd.get('upiId') || '', date: fd.get('date') || oldTx.date, isAtm: type === 'TRANSFER' && toAcc && toAcc.type === 'CASH' };
+      const updatedTx = { ...oldTx, profile: fd.get('profile') || 'PERSONAL', amount, accountId, toAccountId, category: fd.get('category') || oldTx.category, merchant: fd.get('merchant') || fd.get('category') || type, method: fd.get('method') || 'UPI', upiId: fd.get('upiId') || '', notes: fd.get('notes') || '', date: fd.get('date') || oldTx.date, isAtm: type === 'TRANSFER' && toAcc && toAcc.type === 'CASH' };
       applyBalanceImpact(updatedTx, 1);
       state.transactions[idx] = updatedTx;
       await persistState(); closeModal(); renderCurrentView(); showToast('Transaction updated in SQLite!');
     } else {
       const now = new Date();
-      await addTransactionRecord({ id: uid('tx'), profile: fd.get('profile') || 'PERSONAL', type, amount, accountId, toAccountId, category: fd.get('category') || (type === 'TRANSFER' ? 'Transfer' : 'Other'), merchant: fd.get('merchant') || fd.get('category') || type, method: fd.get('method') || 'UPI', upiId: fd.get('upiId') || '', date: fd.get('date') || todayISO(), time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`, source: 'MANUAL' });
+      await addTransactionRecord({ id: uid('tx'), profile: fd.get('profile') || 'PERSONAL', type, amount, accountId, toAccountId, category: fd.get('category') || (type === 'TRANSFER' ? 'Transfer' : 'Other'), merchant: fd.get('merchant') || fd.get('category') || type, method: fd.get('method') || 'UPI', upiId: fd.get('upiId') || '', notes: fd.get('notes') || '', date: fd.get('date') || todayISO(), time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`, source: 'MANUAL' });
       closeModal(); showToast(`${type} of ${formatINR(amount)} saved to SQLite!`);
     }
   }
@@ -2640,7 +2563,7 @@ const PFOS = (() => {
       <div class="space-y-3">
         <div class="p-3.5 rounded-2xl bg-obsidian border border-emerald-500/30">
           <h4 class="text-xs font-bold text-emerald-300 mb-1">1. Install via Chrome (Offline PWA + Shortcuts)</h4>
-          <p class="text-[11px] text-slate-400 mb-2">Includes Android Home Screen 3-second +Expense, +Income, +ATM &amp; Voice shortcuts + Encrypted SQLite.</p>
+          <p class="text-[11px] text-slate-400 mb-2">Includes Android Home Screen +Expense, +Income, +ATM &amp; Voice shortcuts + Encrypted SQLite.</p>
           <button onclick="PFOS.triggerPwaInstall()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">Install App / Show Steps</button>
         </div>
         <div class="p-3.5 rounded-2xl bg-obsidian border border-sky-500/30">
@@ -2863,10 +2786,10 @@ class _PfosSqliteAppState extends State<PfosSqliteApp> {
   // ==================== QUICK ACTION DISPATCHER (PWA SHORTCUTS & NOTIFICATIONS) ====================
   function handleQuickAction(action) {
     if (!action) return;
-    if (action === 'quick-expense') openQuickEntryPad('EXPENSE');
-    else if (action === 'quick-income') openQuickEntryPad('INCOME');
-    else if (action === 'quick-atm') openQuickEntryPad('ATM');
-    else if (action === 'quick-upi') openQuickEntryPad('UPI');
+    if (action === 'quick-expense') openTransactionModal('EXPENSE');
+    else if (action === 'quick-income') openTransactionModal('INCOME');
+    else if (action === 'quick-atm') openTransactionModal('TRANSFER');
+    else if (action === 'quick-upi') openTransactionModal('EXPENSE');
     else if (action === 'voice') openVoiceModal();
     else if (action === 'assistant') setTab('assistant');
     else if (action === 'search') openSearchModal();
@@ -2921,7 +2844,7 @@ class _PfosSqliteAppState extends State<PfosSqliteApp> {
   return {
     setTab, setPlanningSubTab, setAssistantSubTab, switchProfile, closeModal, renderCurrentView,
     handleUnlock, openSetEncryptionModal, saveEncryptionPin, disableEncryption, lockVaultNow,
-    openQuickEntryPad, submitQuickEntry, openSearchModal, runGlobalSearch,
+    openSearchModal, runGlobalSearch,
     processDueRecurringRules, runRecurringNow, toggleRecurringActive,
     openAddRecurringModal, openEditRecurringModal, submitRecurring, deleteRecurring,
     dismissAlert, skipSubscriptionMonth, triggerPersistentSummaryNotification,

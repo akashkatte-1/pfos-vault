@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pfos-sqlite-pwa-v4';
+const CACHE_NAME = 'pfos-sqlite-pwa-v5';
 const CORE_ASSETS = [
   './',
   './index.html',
