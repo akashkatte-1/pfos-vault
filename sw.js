@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pfos-sqlite-pwa-v5';
+const CACHE_NAME = 'pfos-app-v6';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,6 @@ const CORE_ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js',
   'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.wasm',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',
-  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
   'https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js'
 ];
 
@@ -64,12 +63,10 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Handle Offline Local Notification Clicks & Quick Actions (Lock Screen / Notification Shade)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const action = event.action || (event.notification.data && event.notification.data.action) || 'home';
   const targetUrl = './index.html?action=' + encodeURIComponent(action);
-
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
       for (const client of clientsList) {
@@ -79,9 +76,7 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
-      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
     })
   );
 });

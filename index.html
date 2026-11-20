@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#090d16" />
+  <meta name="theme-color" content="#0b0f19" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="./manifest.json" />
-  <title>PFOS v3 — Offline SQLite Financial OS &amp; Assistant</title>
+  <title>PFOS — Personal Finance</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -20,7 +20,7 @@
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: { obsidian: '#090d16', surface: '#111827', card: '#161f32' }
+          colors: { obsidian: '#0b0f19', surface: '#111827', card: '#151e2e' }
         }
       }
     };
@@ -28,160 +28,153 @@
 
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 
   <style>
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #090d16;
-      color: #f3f4f6;
+      background-color: #0b0f19;
+      color: #f1f5f9;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #090d16; }
-    ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 9999px; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fadeUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .stagger-1 { animation-delay: 0.04s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.08s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.12s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.16s; opacity: 0; }
   </style>
 </head>
-<body class="bg-obsidian text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-emerald-500/30">
+<body class="bg-obsidian text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-emerald-500/25">
 
-  <!-- ==================== AES-256-GCM SQLITE UNLOCK GATE ==================== -->
+  <!-- ==================== PIN UNLOCK SCREEN ==================== -->
   <div id="unlock-gate" class="hidden fixed inset-0 z-[100] bg-obsidian/98 backdrop-blur-xl flex flex-col items-center justify-center p-6">
-    <div class="w-full max-w-xs bg-surface border border-slate-800 rounded-3xl p-6 text-center space-y-4 shadow-2xl">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-        <i data-lucide="shield-check" class="w-7 h-7"></i>
+    <div class="w-full max-w-xs bg-surface border border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-2xl">
+      <div class="w-12 h-12 mx-auto rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+        <i data-lucide="lock" class="w-5 h-5"></i>
       </div>
       <div>
-        <h2 class="text-lg font-bold tracking-tight">Decrypt SQLite Vault</h2>
-        <p class="text-xs text-slate-400 mt-1">Your <code class="text-emerald-300">pfos_vault.sqlite</code> is encrypted with AES-256-GCM</p>
+        <h2 class="text-base font-semibold tracking-tight">Unlock PFOS</h2>
+        <p class="text-xs text-slate-400 mt-1">Enter your PIN to access your records</p>
       </div>
       <form onsubmit="PFOS.handleUnlock(event)" class="space-y-3">
         <input id="unlock-pin-input" type="password" inputmode="numeric" minlength="4" maxlength="12" required
-          placeholder="Enter Vault PIN"
-          class="w-full bg-obsidian border border-slate-700 rounded-xl px-4 py-3 text-center text-lg tracking-widest font-bold text-slate-100 focus:outline-none focus:border-emerald-500" />
+          placeholder="Enter PIN"
+          class="w-full bg-obsidian border border-slate-700 rounded-xl px-4 py-3 text-center text-lg tracking-widest font-semibold text-slate-100 focus:outline-none focus:border-emerald-500" />
         <p id="unlock-error" class="text-xs text-rose-400 min-h-[16px]"></p>
-        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
-          Decrypt &amp; Open SQLite Vault
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition">
+          Unlock
         </button>
       </form>
     </div>
   </div>
 
   <!-- ==================== DESKTOP SIDEBAR ==================== -->
-  <aside class="hidden md:flex md:flex-col md:w-64 lg:w-72 bg-surface border-r border-slate-800/80 shrink-0 h-screen sticky top-0 p-4 justify-between">
+  <aside class="hidden md:flex md:flex-col md:w-60 lg:w-64 bg-surface border-r border-slate-800/80 shrink-0 h-screen sticky top-0 p-4 justify-between">
     <div>
-      <div class="flex items-center gap-3 px-2 py-2 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-extrabold text-lg">₹</div>
+      <div class="flex items-center gap-2.5 px-2 py-2 mb-5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-bold text-base">₹</div>
         <div>
-          <h1 class="font-extrabold text-base tracking-tight leading-tight">PFOS <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 ml-1">v3 SQLite</span></h1>
-          <p class="text-[11px] text-slate-400">Offline Financial OS</p>
+          <h1 class="font-bold text-sm tracking-tight leading-tight text-slate-100">PFOS</h1>
+          <p class="text-[11px] text-slate-400">Personal Finance</p>
         </div>
       </div>
 
       <div class="mb-4 px-1">
-        <label class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold block mb-1.5 px-1">Active Profile</label>
+        <label class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold block mb-1.5 px-1">Profile</label>
         <select id="desktop-profile-select" onchange="PFOS.switchProfile(this.value)" class="w-full bg-card border border-slate-700/70 rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-emerald-500">
-          <option value="ALL">All Profiles (Consolidated)</option>
-          <option value="PERSONAL">Individual — Personal</option>
-          <option value="FAMILY">Family — Household</option>
-          <option value="BUSINESS">Freelancer — Business</option>
+          <option value="ALL">All Profiles</option>
+          <option value="PERSONAL">Personal</option>
+          <option value="FAMILY">Family</option>
+          <option value="BUSINESS">Business</option>
         </select>
       </div>
 
       <nav class="space-y-1" id="desktop-nav">
-        <button data-tab="home" onclick="PFOS.setTab('home')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Commitments Home</button>
-        <button data-tab="accounts" onclick="PFOS.setTab('accounts')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="wallet" class="w-4 h-4"></i> Accounts &amp; Cards</button>
-        <button data-tab="timeline" onclick="PFOS.setTab('timeline')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="list-ordered" class="w-4 h-4"></i> Daily Timeline</button>
-        <button data-tab="planning" onclick="PFOS.setTab('planning')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="repeat" class="w-4 h-4"></i> Recurring &amp; Plan</button>
-        <button data-tab="assistant" onclick="PFOS.setTab('assistant')" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <span class="flex items-center gap-3"><i data-lucide="bell-ring" class="w-4 h-4"></i> Smart Assistant</span>
+        <button data-tab="home" onclick="PFOS.setTab('home')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Overview</button>
+        <button data-tab="accounts" onclick="PFOS.setTab('accounts')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="wallet" class="w-4 h-4"></i> Accounts &amp; Cards</button>
+        <button data-tab="timeline" onclick="PFOS.setTab('timeline')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="list-ordered" class="w-4 h-4"></i> Transactions</button>
+        <button data-tab="planning" onclick="PFOS.setTab('planning')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="repeat" class="w-4 h-4"></i> Planning &amp; Loans</button>
+        <button data-tab="assistant" onclick="PFOS.setTab('assistant')" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition">
+          <span class="flex items-center gap-3"><i data-lucide="bell" class="w-4 h-4"></i> Reminders</span>
           <span id="sidebar-alert-badge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950">0</span>
         </button>
-        <button data-tab="analytics" onclick="PFOS.setTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="pie-chart" class="w-4 h-4"></i> Analytics &amp; Net Worth</button>
-        <button data-tab="settings" onclick="PFOS.setTab('settings')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition"><i data-lucide="database" class="w-4 h-4"></i> SQLite Vault &amp; APK</button>
+        <button data-tab="analytics" onclick="PFOS.setTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Analytics</button>
+        <button data-tab="settings" onclick="PFOS.setTab('settings')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition"><i data-lucide="settings" class="w-4 h-4"></i> Settings</button>
       </nav>
     </div>
 
-    <div class="space-y-2.5 pt-4 border-t border-slate-800/80">
-      <button onclick="PFOS.openTransactionModal('EXPENSE')" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i> + Add Transaction
+    <div class="pt-4 border-t border-slate-800/80">
+      <button onclick="PFOS.openTransactionModal('EXPENSE')" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition active:scale-[0.98]">
+        <i data-lucide="plus" class="w-4 h-4"></i> New Transaction
       </button>
-      <div class="flex items-center justify-between px-2 text-[11px] text-slate-400">
-        <span id="sidebar-sqlite-status" class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Booting SQLite...</span>
-        <span class="text-slate-500">₹0 Cost</span>
-      </div>
     </div>
   </aside>
 
   <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
   <div class="flex-1 flex flex-col min-w-0 pb-24 md:pb-8">
-    <header class="sticky top-0 z-30 bg-obsidian/92 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 min-w-0">
-        <div class="md:hidden w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-extrabold text-sm shrink-0">₹</div>
-        <div class="min-w-0">
-          <h2 id="header-title" class="text-sm sm:text-base md:text-lg font-bold tracking-tight truncate">Money Commitments</h2>
-          <p class="text-[11px] text-slate-400 truncate hidden sm:block">Offline SQLite • Recurring Engine • 15-Category Assistant • ₹0 Cost</p>
-        </div>
+    <header class="sticky top-0 z-30 bg-obsidian/92 backdrop-blur-md border-b border-slate-800/70 px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="md:hidden w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-bold text-sm shrink-0">₹</div>
+        <h2 id="header-title" class="text-sm sm:text-base font-semibold tracking-tight truncate text-slate-100">Overview</h2>
       </div>
 
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <select id="mobile-profile-select" onchange="PFOS.switchProfile(this.value)" class="md:hidden bg-card border border-slate-700/80 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-200 max-w-[72px]">
+      <div class="flex items-center gap-2 shrink-0">
+        <select id="mobile-profile-select" onchange="PFOS.switchProfile(this.value)" class="md:hidden bg-card border border-slate-700/80 rounded-lg px-2 py-1.5 text-[11px] font-medium text-slate-200 max-w-[78px]">
           <option value="ALL">All</option>
-          <option value="PERSONAL">Self</option>
+          <option value="PERSONAL">Personal</option>
           <option value="FAMILY">Family</option>
-          <option value="BUSINESS">Biz</option>
+          <option value="BUSINESS">Business</option>
         </select>
 
-        <!-- Global Search Engine Trigger -->
-        <button onclick="PFOS.openSearchModal()" class="p-2 rounded-xl bg-card hover:bg-slate-800 border border-slate-700/80 text-slate-200 transition active:scale-95" title="Search Everything (Ctrl+K)">
+        <button onclick="PFOS.openSearchModal()" class="p-2 rounded-xl bg-card hover:bg-slate-800 border border-slate-800 text-slate-300 transition active:scale-95" title="Search (Ctrl+K)">
           <i data-lucide="search" class="w-4 h-4"></i>
         </button>
 
-        <!-- Smart Assistant Alerts Bell -->
-        <button onclick="PFOS.setTab('assistant')" class="relative p-2 rounded-xl bg-card hover:bg-slate-800 border border-slate-700/80 text-amber-400 transition active:scale-95" title="Smart Financial Assistant">
+        <button onclick="PFOS.setTab('assistant')" class="relative p-2 rounded-xl bg-card hover:bg-slate-800 border border-slate-800 text-slate-300 transition active:scale-95" title="Reminders">
           <i data-lucide="bell" class="w-4 h-4"></i>
-          <span id="header-alert-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center">0</span>
-        </button>
-
-        
+          <span id="header-alert-badge" class="hidden absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
         </button>
       </div>
     </header>
 
-    <!-- Category 15: Optional Persistent Silent Summary Notification Bar -->
-    <div id="persistent-summary-bar" onclick="PFOS.setTab('home')" class="hidden cursor-pointer bg-slate-900/95 border-b border-slate-800/80 px-4 py-1.5 text-[11px] flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-slate-300 hover:bg-slate-900 transition"></div>
-
-    <main id="app-view" class="flex-1 w-full max-w-6xl mx-auto p-4 md:p-6 space-y-5 animate-fade-in">
-      <div class="flex flex-col items-center justify-center py-20 text-slate-400 text-xs gap-3">
-        <div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p>Opening local SQLite vault...</p>
+    <main id="app-view" class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-6 space-y-5">
+      <div class="flex flex-col items-center justify-center py-24 text-slate-400 text-xs gap-3">
+        <div class="w-7 h-7 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <p>Loading your finances...</p>
       </div>
     </main>
   </div>
 
-  <!-- ==================== FLOATING ADD TRANSACTION BUTTON ==================== -->
-  <button onclick="PFOS.openTransactionModal('EXPENSE')" class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 h-12 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-2xl shadow-emerald-500/30 flex items-center gap-1.5 active:scale-95 transition" title="Add Expense / Income / Transfer">
-    <i data-lucide="plus" class="w-4 h-4"></i><span>+ Add</span>
+  <!-- ==================== FLOATING ADD BUTTON ==================== -->
+  <button onclick="PFOS.openTransactionModal('EXPENSE')" class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 h-11 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-95 transition" title="Add Transaction">
+    <i data-lucide="plus" class="w-4 h-4"></i><span>Add</span>
   </button>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
   <nav id="mobile-nav" class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur-lg border-t border-slate-800 px-1.5 py-1.5 flex items-center justify-around">
     <button data-tab="home" onclick="PFOS.setTab('home')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Home</span></button>
     <button data-tab="accounts" onclick="PFOS.setTab('accounts')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="wallet" class="w-5 h-5"></i><span>Accounts</span></button>
-    <button data-tab="timeline" onclick="PFOS.setTab('timeline')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="list-ordered" class="w-5 h-5"></i><span>Timeline</span></button>
+    <button data-tab="timeline" onclick="PFOS.setTab('timeline')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="list-ordered" class="w-5 h-5"></i><span>Activity</span></button>
     <button data-tab="planning" onclick="PFOS.setTab('planning')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="repeat" class="w-5 h-5"></i><span>Plan</span></button>
-    <button data-tab="assistant" onclick="PFOS.setTab('assistant')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="bell-ring" class="w-5 h-5"></i><span>Assist</span></button>
-    <button data-tab="settings" onclick="PFOS.setTab('settings')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="database" class="w-5 h-5"></i><span>Vault</span></button>
+    <button data-tab="analytics" onclick="PFOS.setTab('analytics')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="bar-chart-3" class="w-5 h-5"></i><span>Stats</span></button>
+    <button data-tab="settings" onclick="PFOS.setTab('settings')" class="m-nav-btn flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] font-medium transition"><i data-lucide="settings" class="w-5 h-5"></i><span>Settings</span></button>
   </nav>
 
   <!-- ==================== UNIVERSAL MODAL CONTAINER ==================== -->
   <div id="modal-backdrop" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target === this) PFOS.closeModal()">
-    <div id="modal-content" class="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-surface border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 animate-fade-in"></div>
+    <div id="modal-content" class="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-surface border border-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 animate-fade-up"></div>
   </div>
 
   <!-- ==================== TOAST CONTAINER ==================== -->

@@ -1,7 +1,7 @@
 {
-  "name": "PFOS \u2014 Personal Financial Operating System",
+  "name": "PFOS \u2014 Personal Finance",
   "short_name": "PFOS",
-  "description": "100% Offline-First Encrypted SQLite Personal Financial Operating System & Smart Assistant",
+  "description": "Private, offline-first personal finance manager",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -25,8 +25,8 @@
   "shortcuts": [
     {
       "name": "Add Expense",
-      "short_name": "+ Expense",
-      "description": "Log a detailed expense",
+      "short_name": "Expense",
+      "description": "Record a new expense",
       "url": "./index.html?action=quick-expense",
       "icons": [
         {
@@ -38,38 +38,12 @@
     },
     {
       "name": "Add Income",
-      "short_name": "+ Income",
-      "description": "Log incoming cash, salary, or UPI",
+      "short_name": "Income",
+      "description": "Record new income",
       "url": "./index.html?action=quick-income",
       "icons": [
         {
           "src": "https://placehold.co/192x192/10b981/090d16.png?text=+%E2%82%B9",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Voice Transaction Entry",
-      "short_name": "Voice",
-      "description": "Speak an expense or income offline",
-      "url": "./index.html?action=voice",
-      "icons": [
-        {
-          "src": "https://placehold.co/192x192/8b5cf6/ffffff.png?text=MIC",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "ATM / Transfer",
-      "short_name": "Transfer",
-      "description": "Log ATM withdrawal or account transfer",
-      "url": "./index.html?action=quick-atm",
-      "icons": [
-        {
-          "src": "https://placehold.co/192x192/0ea5e9/ffffff.png?text=ATM",
           "sizes": "192x192",
           "type": "image/png"
         }
